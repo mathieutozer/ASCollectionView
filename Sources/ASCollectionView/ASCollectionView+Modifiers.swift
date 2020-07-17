@@ -184,6 +184,13 @@ public extension ASCollectionView
 		this.layout = Layout(createCustomLayout: createCustomLayout, configureCustomLayout: configureCustomLayout)
 		return this
 	}
+
+  func maxItemCacheSize(_ size: Int) -> Self
+  {
+    var this = self
+    this.maximumItemCacheSize = size
+    return this
+  }
 }
 
 @available(iOS 13.0, *)

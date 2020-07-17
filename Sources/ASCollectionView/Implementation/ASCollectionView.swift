@@ -21,6 +21,8 @@ public struct ASCollectionView<SectionID: Hashable>: UIViewControllerRepresentab
 
 	// MARK: Internal variables modified by modifier functions
 
+  internal var maximumItemCacheSize: Int = 50
+
 	internal var delegateInitialiser: (() -> ASCollectionViewDelegate) = ASCollectionViewDelegate.init
 
 	internal var contentSizeTracker: ContentSizeTracker?
@@ -67,6 +69,8 @@ public struct ASCollectionView<SectionID: Hashable>: UIViewControllerRepresentab
 
 		let collectionViewController = AS_CollectionViewController(collectionViewLayout: collectionViewLayout)
 		collectionViewController.coordinator = context.coordinator
+
+    context.coordinator.maximumItemCacheSize = maximumItemCacheSize
 
 		context.coordinator.collectionViewController = collectionViewController
 		context.coordinator.delegate = delegate
@@ -137,6 +141,11 @@ public struct ASCollectionView<SectionID: Hashable>: UIViewControllerRepresentab
 
 		// MARK: Caching
 
+    var maximumItemCacheSize: Int = 50 {
+      didSet {
+        autoCachingHostingControllers.maxSize = maximumItemCacheSize
+      }
+    }
 		private var autoCachingHostingControllers = ASPriorityCache<ASCollectionViewItemUniqueID, ASHostingControllerProtocol>()
 		private var explicitlyCachedHostingControllers: [ASCollectionViewItemUniqueID: ASHostingControllerProtocol] = [:]
 		private var autoCachingSupplementaryHostControllers = ASPriorityCache<ASSupplementaryCellID<SectionID>, ASHostingControllerProtocol>()
@@ -230,6 +239,10 @@ public struct ASCollectionView<SectionID: Hashable>: UIViewControllerRepresentab
 
 				// Update hostingController
 				let cachedHC = self.explicitlyCachedHostingControllers[itemID] ?? self.autoCachingHostingControllers[itemID]
+
+        if cachedHC != nil {
+          print("GOT CACHED", cachedHC)
+        }
 				cell.hostingController = section.dataSource.updateOrCreateHostController(forItemID: itemID, existingHC: cachedHC)
 
 				// Cache the HC
